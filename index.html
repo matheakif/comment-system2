@@ -389,10 +389,14 @@
     <div id="listContainer" class="records-grid">
         <div class="empty-message">🌟 目前還沒有閑置物品，快來發布第一個交換物吧～</div>
     </div>
-    <footer>📀 資料儲存於 localStorage · 刷新頁面資料不消失 · 自由切換 active / done</footer>
+    <footer>📀 資料同步於 Google Sheet · 支援離線 localStorage 備份</footer>
 </div>
 
 <script>
+    // ======================== BACKEND CONFIGURATION ========================
+    // Google Apps Script Web App URL
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygCO2C1pObxCe5lkwtfPBtkBVzZzn5dEd5N8IiHvY2I335UAzPW-jzcxaJpZFj80Nm/exec";
+    
     // ======================== DATA CONTRACT ========================
     /**
      * 二手閑置交換網站 - 資料合約 (Record 結構)
@@ -404,14 +408,6 @@
      * @property {string} content      - 閑置內容 (物品標題/名稱)，必填
      * @property {string} category     - 分類，只能是 '潮玩' / '服裝' / '電子設備' / '其他'
      * @property {string} message      - 留言 / 備註 (可選，可能為空)
-     * 
-     * 用途說明：
-     * - id: 讓每筆紀錄可以被獨立更新、刪除或切換狀態
-     * - createdAt: 展示發布時間，提供排序基準 (新到舊)
-     * - status: 用來區分「仍可交換」或「已交換/完成」
-     * - content: 顯示交換物品核心資訊
-     * - category: 提供未來擴充分類篩選，目前雖主要用狀態篩選，但仍保留完整欄位
-     * - message: 補充交換條件、聯絡方式或物品細節
      */
 
     // ---------- 全域變數 ----------
@@ -451,55 +447,113 @@
         return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
     }
 
-    // ---------- 核心函式 (遵照題目要求拆分) ----------
+    // ======================== BACKEND CONNECTOR FUNCTIONS ========================
+    
+    /**
+     * 1. syncToSheet(payload)
+     * 使用 fetch POST 到 APPS_SCRIPT_URL，同步資料到 Google Sheet
+     * @param {Object} payload - { action, record?, id?, changes? }
+     * @returns {Promise<Object>} - 回傳 API 回應
+     */
+    async function syncToSheet(payload) {
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            });
+            console.log("syncToSheet 已送出:", payload);
+            return { ok: true, message: "Request sent (no-cors mode)" };
+        } catch (err) {
+            console.error("syncToSheet 錯誤:", err);
+            return { ok: false, error: err.message };
+        }
+    }
 
     /**
-     * 1. createRecord(formData)
-     * 根據表單內容建立一個全新的 record 物件 (尚未儲存)
-     * @param {Object} formData - 包含 content, category, message
-     * @returns {ExchangeRecord}
+     * 2. fetchRecordsFromSheet()
+     * 使用 GET fetch(APPS_SCRIPT_URL) 讀取所有紀錄
+     * @returns {Promise<Array>} - 回傳紀錄陣列 (已正規化)
      */
+    async function fetchRecordsFromSheet() {
+        try {
+            const response = await fetch(APPS_SCRIPT_URL);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            if (!data.ok) throw new Error(data.error || "API 回傳錯誤");
+            const records = (data.records || []).map(normalizeRecord);
+            return records;
+        } catch (err) {
+            console.error("fetchRecordsFromSheet 錯誤:", err);
+            throw err;
+        }
+    }
+
+    /**
+     * 3. normalizeRecord(record)
+     * 將 Sheet 回傳的欄位對應回前端 key
+     * 支援大小寫轉換 (ID -> id, CreatedAt -> createdAt, Status -> status)
+     * @param {Object} record - 從 Sheet 讀取的原始紀錄
+     * @returns {Object} - 正規化後的前端紀錄
+     */
+    function normalizeRecord(record) {
+        if (!record) return {};
+        return {
+            id: record.id || record.ID || "",
+            createdAt: record.createdAt || record.CreatedAt || new Date().toISOString(),
+            status: record.status || record.Status || "active",
+            content: record.content || record.Content || "",
+            category: record.category || record.Category || "其他",
+            message: record.message || record.Message || ""
+        };
+    }
+
+    // ---------- 核心函式 (修改版) ----------
+
     function createRecord(formData) {
-        // 必填欄位驗證: content 不可為空白
         if (!formData.content || formData.content.trim() === '') {
             throw new Error('請填寫閑置內容！');
         }
-        // 確保分類為合法值 (如果意外傳入髒值就預設其他)
         const validCategories = ['潮玩', '服裝', '電子設備', '其他'];
         const finalCategory = validCategories.includes(formData.category) ? formData.category : '其他';
 
         return {
             id: generateId(),
             createdAt: new Date().toISOString(),
-            status: 'active',   // 預設 active
+            status: 'active',
             content: formData.content.trim(),
             category: finalCategory,
             message: formData.message ? formData.message.trim() : '',
         };
     }
 
-    /**
-     * 2. saveData(record)
-     * 只負責新增一筆 record 到 recordsArray 並存入 localStorage
-     * @param {ExchangeRecord} record
-     */
     function saveData(record) {
-        // 最新資料顯示在最上方 (unshift)
         recordsArray.unshift(record);
         localStorage.setItem('records', JSON.stringify(recordsArray));
+        syncToSheet({ action: "create", record: record }).catch(err => {
+            console.warn("同步到 Sheet 失敗 (create):", err);
+        });
     }
 
-    /**
-     * 3. loadData()
-     * 從 localStorage 讀取 records，若無資料則回傳 []
-     * @returns {ExchangeRecord[]}
-     */
-    function loadData() {
+    async function loadData() {
+        try {
+            const remoteRecords = await fetchRecordsFromSheet();
+            if (remoteRecords && remoteRecords.length >= 0) {
+                remoteRecords.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                recordsArray = remoteRecords;
+                localStorage.setItem('records', JSON.stringify(recordsArray));
+                console.log(`從 Sheet 載入 ${recordsArray.length} 筆資料`);
+                return recordsArray;
+            }
+        } catch (remoteErr) {
+            console.warn("從 Sheet 讀取失敗，使用 localStorage 備份:", remoteErr);
+        }
+        
         const stored = localStorage.getItem('records');
         if (stored) {
             try {
                 const parsed = JSON.parse(stored);
-                // 相容性清潔：確保每一筆都有必要的欄位，防止舊結構壞掉
                 const cleaned = parsed.map(item => ({
                     id: item.id || generateId(),
                     createdAt: item.createdAt || new Date().toISOString(),
@@ -511,7 +565,7 @@
                 recordsArray = cleaned;
                 return recordsArray;
             } catch(e) {
-                console.error("載入失敗", e);
+                console.error("載入 localStorage 失敗", e);
                 recordsArray = [];
                 return [];
             }
@@ -521,27 +575,20 @@
         }
     }
 
-    /**
-     * 5. updateRecord(id, changes)
-     * 更新一筆 record 的指定欄位，然後立即寫入 localStorage
-     * @param {string} id
-     * @param {Object} changes - 要修改的 key-value 對 (例如 { status: 'done' })
-     * @returns {boolean}
-     */
     function updateRecord(id, changes) {
-        const index = recordsArray.findIndex(record => record.id === id);
+        const index = recordsArray.findIndex(r => r.id === id);
         if (index === -1) return false;
-        // 合併變更，不改變原參考完整性
+        
         recordsArray[index] = { ...recordsArray[index], ...changes };
         localStorage.setItem('records', JSON.stringify(recordsArray));
+        
+        syncToSheet({ action: "update", id: id, changes: changes }).catch(err => {
+            console.warn("同步到 Sheet 失敗 (update):", err);
+        });
+        
         return true;
     }
 
-    /**
-     * 4. renderList(recordsToShow)
-     * 根據傳入的 records 陣列繪製卡片到頁面 (支援 filter 後顯示)
-     * @param {ExchangeRecord[]} recordsToShow
-     */
     function renderList(recordsToShow) {
         if (!listContainer) return;
         if (!recordsToShow || recordsToShow.length === 0) {
@@ -549,7 +596,6 @@
             return;
         }
 
-        // 依照 createdAt 新到舊排序 (保證新增時最新會在最上面)
         const sorted = [...recordsToShow].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         const cardsHTML = sorted.map(record => {
@@ -560,7 +606,6 @@
             const buttonText = isDone ? '♻️ 恢復 active' : '🏷️ 標記 done';
             const newStatusValue = isDone ? 'active' : 'done';
 
-            // 為分類添加小圖示輔助
             let categoryIcon = '';
             if (record.category === '潮玩') categoryIcon = '🧸';
             else if (record.category === '服裝') categoryIcon = '👕';
@@ -592,14 +637,12 @@
 
         listContainer.innerHTML = cardsHTML;
 
-        // 綁定切換狀態按鈕事件
         document.querySelectorAll('[data-action="toggleStatus"]').forEach(btn => {
             btn.removeEventListener('click', handleToggleStatus);
             btn.addEventListener('click', handleToggleStatus);
         });
     }
 
-    // 狀態切換處理函式
     function handleToggleStatus(e) {
         const btn = e.currentTarget;
         const id = btn.getAttribute('data-id');
@@ -607,19 +650,15 @@
         if (!id || !newStatus) return;
         if (newStatus === 'active' || newStatus === 'done') {
             updateRecord(id, { status: newStatus });
-            // 重新套用過濾條件並渲染
             applyFilterAndRender();
         }
     }
 
-    // ---------- 過濾邏輯 ----------
     function getFilteredRecords() {
         let filtered = [...recordsArray];
-        // 狀態過濾
         if (currentStatusFilter !== 'all') {
             filtered = filtered.filter(record => record.status === currentStatusFilter);
         }
-        // 新到舊排序 (render內部會再排一次，但這裡先確保順序)
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         return filtered;
     }
@@ -629,7 +668,6 @@
         renderList(filtered);
     }
 
-    // 更新過濾按鈕 UI 樣式
     function updateFilterButtonsUI() {
         document.querySelectorAll('[data-status-filter]').forEach(btn => {
             const filterVal = btn.getAttribute('data-status-filter');
@@ -641,7 +679,6 @@
         });
     }
 
-    // 綁定過濾事件
     function bindFilterEvents() {
         const statusBtns = document.querySelectorAll('[data-status-filter]');
         statusBtns.forEach(btn => {
@@ -656,7 +693,6 @@
         });
     }
 
-    // 新增交換物品的主流程 (使用 createRecord + saveData)
     function addExchangeItem() {
         const content = contentInput.value;
         const category = categorySelect.value;
@@ -665,42 +701,33 @@
         try {
             const formData = { content, category, message };
             const newRecord = createRecord(formData);
-            saveData(newRecord);      // 新增到 recordsArray 並存 localStorage
-            // 清空表單 (保留分類預設值不清分類，保持方便，但內容跟留言清空)
+            saveData(newRecord);
             contentInput.value = '';
             messageInput.value = '';
-            // 為了讓新增後即時顯示，且符合「全部」可見，保留當前篩選但確保新紀錄符合篩選原則:
-            // 若目前篩選為 active，新的紀錄是 active ，可以顯示；若篩選為 done，使用者會暫時看不到。但大多數情境下友善重置篩選為all會更好:
-            // 為了即時顯示在頁面上，建議重置篩選至「全部」，讓用戶立刻看到新卡片在頂部。這樣符合直覺。
             currentStatusFilter = 'all';
             updateFilterButtonsUI();
             applyFilterAndRender();
-            // 聚焦回內容欄
             contentInput.focus();
         } catch (err) {
             alert(err.message);
         }
     }
 
-    // ---------- 初始化系統 ----------
-    function init() {
-        loadData();                     // 從 localStorage 讀取資料
-        bindFilterEvents();            // 過濾器監聽
+    async function init() {
+        await loadData();
+        bindFilterEvents();
         submitBtn.addEventListener('click', () => {
             addExchangeItem();
         });
-        // 支援 Enter 快速新增 (在內容輸入框按Enter)
         contentInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 addExchangeItem();
             }
         });
-        // 初始渲染所有資料 (預設全部)
         applyFilterAndRender();
     }
 
-    // 啟動應用
     init();
 </script>
 </body>
