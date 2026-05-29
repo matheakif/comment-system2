@@ -2,28 +2,28 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>二手閑置交換站 | 潮玩·服裝·電子·其他</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Noto Sans', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #fef9e8 0%, #f4ede4 100%);
+            background: #fefce8;
             padding: 2rem 1.2rem;
             min-height: 100vh;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        /* 標題區 */
+        /* 標題區 - 可愛粗體字 + 紫黃漸層 */
         .hero {
             text-align: center;
             margin-bottom: 2rem;
@@ -31,52 +31,120 @@
 
         .hero h1 {
             font-size: 2.3rem;
-            background: linear-gradient(120deg, #c77d3e, #a85d2c);
+            font-family: 'Comic Neue', 'Chalkboard SE', 'Comic Neue', 'Segoe UI Emoji', 'Apple Color Emoji', system-ui, 'Noto Sans', sans-serif;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a855f7, #eab308);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
             letter-spacing: -0.3px;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .hero h1::before {
             content: "🔄";
-            font-size: 2rem;
+            font-size: 1.8rem;
             background: none;
-            color: #b97f44;
+            color: #a855f7;
         }
 
         .hero h1::after {
             content: "♻️";
-            font-size: 2rem;
+            font-size: 1.8rem;
             background: none;
-            color: #c58a54;
+            color: #eab308;
         }
 
         .sub {
-            color: #7e5a42;
+            color: #a855f7;
             margin-top: 0.5rem;
             font-weight: 500;
             font-size: 0.9rem;
         }
 
+        /* 統計摘要卡片 */
+        .stats-container {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.8rem;
+            justify-content: center;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem 1.8rem;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #fef3c7;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 20px -10px rgba(168, 85, 247, 0.25);
+        }
+
+        .stat-number {
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .stat-bar-container {
+            margin-top: 12px;
+            height: 8px;
+            background: #fef9e6;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .stat-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .stat-bar.active-bar { background: #c084fc; }
+        .stat-bar.done-bar { background: #fde047; }
+
+        .stat-card.active-stat .stat-number { color: #a855f7; }
+        .stat-card.done-stat .stat-number { color: #9ca3af; }
+
         /* 表單卡片 */
         .form-card {
             background: white;
-            border-radius: 36px;
-            padding: 1.6rem 2rem;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
+            border-radius: 32px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
             margin-bottom: 2rem;
-            border: 1px solid #f3e1cf;
-            transition: 0.2s;
+            border: 1px solid #fef3c7;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .form-card:hover {
+            box-shadow: 0 12px 28px rgba(168, 85, 247, 0.12);
         }
 
         .form-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 18px;
+            gap: 16px;
             align-items: flex-end;
         }
 
@@ -87,11 +155,11 @@
 
         .input-group label {
             display: block;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #b35f2b;
+            letter-spacing: 0.6px;
+            color: #a855f7;
             margin-bottom: 6px;
         }
 
@@ -99,11 +167,11 @@
             width: 100%;
             padding: 12px 16px;
             border-radius: 28px;
-            border: 1.5px solid #f0dfcf;
-            background: #fffdfa;
+            border: 1.5px solid #fef3c7;
+            background: #ffffff;
             font-size: 0.9rem;
             outline: none;
-            transition: 0.2s;
+            transition: all 0.2s ease;
             font-family: inherit;
         }
 
@@ -114,107 +182,143 @@
         }
 
         .input-group input:focus, .input-group select:focus, .input-group textarea:focus {
-            border-color: #c98954;
-            box-shadow: 0 0 0 3px rgba(201, 137, 84, 0.2);
+            border-color: #c084fc;
+            box-shadow: 0 0 0 3px rgba(192, 132, 252, 0.2);
         }
 
+        /* 按鈕 - 紫色 + 黃色 hover */
         .btn-primary {
-            background: #c47a44;
+            background: #a855f7;
             color: white;
             border: none;
             padding: 12px 28px;
-            border-radius: 44px;
+            border-radius: 40px;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             display: inline-flex;
             align-items: center;
             gap: 8px;
         }
 
         .btn-primary:hover {
-            background: #a56132;
-            transform: scale(0.97);
+            background: #eab308;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(234, 179, 8, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
         }
 
         /* 過濾欄 */
         .filter-bar {
             background: white;
             border-radius: 60px;
-            padding: 0.6rem 1.6rem;
+            padding: 0.6rem 1.5rem;
             margin-bottom: 2rem;
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            gap: 24px;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.03);
-            border: 1px solid #f1e0d0;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #fef3c7;
         }
 
         .filter-group {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             flex-wrap: wrap;
             align-items: center;
         }
 
         .filter-group span {
             font-weight: 700;
-            color: #9b5e34;
-            font-size: 0.85rem;
+            color: #a855f7;
+            font-size: 0.8rem;
         }
 
         .filter-btn {
-            background: #f6ede5;
+            background: #fefce8;
             border: none;
-            padding: 6px 20px;
+            padding: 6px 18px;
             border-radius: 40px;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             cursor: pointer;
-            transition: all 0.2s;
-            color: #8b5633;
+            transition: all 0.2s ease;
+            color: #a855f7;
         }
 
         .filter-btn.active {
-            background: #c47a44;
+            background: #a855f7;
             color: white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .filter-btn:hover:not(.active) {
-            background: #e7d5c6;
+            background: #fef3c7;
+            transform: translateY(-1px);
         }
 
-        /* 卡片列表 - 雜誌風格 */
+        .search-input {
+            padding: 8px 18px;
+            border-radius: 40px;
+            border: 1.5px solid #fef3c7;
+            background: white;
+            font-size: 0.85rem;
+            outline: none;
+            width: 220px;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: #c084fc;
+            box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.2);
+        }
+
+        /* 卡片網格 */
         .records-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
         }
 
+        /* 卡片 */
         .exchange-card {
             background: white;
-            border-radius: 32px;
+            border-radius: 28px;
             overflow: hidden;
-            transition: all 0.2s ease;
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.04);
-            border: 1px solid #f3e2d4;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #fef3c7;
             display: flex;
             flex-direction: column;
         }
 
+        .exchange-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -12px rgba(168, 85, 247, 0.28);
+            border-color: #fde047;
+        }
+
         .exchange-card.done {
-            background: #faf6f1;
-            opacity: 0.82;
-            border-left: 6px solid #b8a28e;
+            background: #fefce8;
+            opacity: 0.85;
+            border-left: 6px solid #fde047;
             filter: grayscale(0.02);
         }
 
+        .exchange-card.done:hover {
+            opacity: 0.95;
+            transform: translateY(-3px);
+        }
+
         .card-inner {
-            padding: 1.4rem 1.4rem 1.2rem;
+            padding: 1.4rem 1.3rem 1.2rem;
             flex: 1;
         }
 
@@ -228,30 +332,31 @@
         }
 
         .category-badge {
-            background: #f7ede4;
-            padding: 5px 14px;
+            background: #fef9e6;
+            padding: 4px 14px;
             border-radius: 60px;
             font-size: 0.7rem;
-            font-weight: 800;
-            color: #b9622c;
+            font-weight: 700;
+            color: #a855f7;
+            letter-spacing: 0.3px;
         }
 
         .status-badge {
             font-size: 0.65rem;
-            background: #eae1d8;
+            background: #f1f5f9;
             padding: 4px 12px;
             border-radius: 30px;
             font-weight: 700;
         }
 
         .status-badge.active {
-            background: #e0cdbb;
-            color: #8b4a22;
+            background: #f3e8ff;
+            color: #a855f7;
         }
 
         .status-badge.done {
-            background: #d6cbbc;
-            color: #6f5843;
+            background: #fef9e6;
+            color: #b45309;
             text-decoration: line-through;
         }
 
@@ -259,29 +364,34 @@
             font-size: 1.25rem;
             font-weight: 800;
             margin: 12px 0 8px;
-            color: #573c28;
-            line-height: 1.3;
+            color: #1e293b;
+            line-height: 1.35;
             word-break: break-word;
         }
 
         .message-text {
-            background: #fef6ef;
+            background: #fefce8;
             padding: 10px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
-            color: #6d4c32;
-            margin: 10px 0 14px;
-            border-left: 3px solid #d69d6e;
+            color: #a855f7;
+            margin: 12px 0 14px;
+            border-left: 3px solid #fde047;
             word-break: break-word;
+            transition: background 0.2s ease;
+        }
+
+        .exchange-card:hover .message-text {
+            background: #fef9e6;
         }
 
         .meta-info {
             font-size: 0.7rem;
-            color: #b49273;
+            color: #94a3b8;
             display: flex;
             justify-content: space-between;
             margin-top: 12px;
-            border-top: 1px dashed #f0dfcf;
+            border-top: 1px solid #fef3c7;
             padding-top: 10px;
         }
 
@@ -290,21 +400,22 @@
         }
 
         .toggle-btn {
-            background: #f0e2d6;
+            background: #fefce8;
             border: none;
             width: 100%;
             padding: 10px 0;
-            border-radius: 60px;
+            border-radius: 40px;
             font-weight: 700;
             font-size: 0.75rem;
             cursor: pointer;
-            transition: 0.1s;
-            color: #a1623a;
+            transition: all 0.2s ease;
+            color: #a855f7;
         }
 
         .toggle-btn:hover {
-            background: #e2cfbe;
-            color: #784a28;
+            background: #fef3c7;
+            color: #eab308;
+            transform: scale(0.98);
         }
 
         .empty-message {
@@ -313,17 +424,21 @@
             padding: 3rem;
             background: white;
             border-radius: 48px;
-            color: #b48762;
+            color: #c084fc;
             font-size: 1rem;
+            border: 1px solid #fef3c7;
         }
 
         footer {
             text-align: center;
-            margin-top: 2.8rem;
+            margin-top: 3rem;
             font-size: 0.7rem;
-            color: #c2a184;
+            color: #fde047;
+            border-top: 1px solid #fef3c7;
+            padding-top: 1.5rem;
         }
 
+        /* 手機適配 */
         @media (max-width: 680px) {
             body {
                 padding: 1rem;
@@ -332,9 +447,32 @@
                 padding: 1.2rem;
             }
             .filter-bar {
-                border-radius: 36px;
+                border-radius: 32px;
                 flex-direction: column;
-                align-items: center;
+                align-items: stretch;
+                background: white;
+            }
+            .filter-group {
+                justify-content: space-between;
+            }
+            .search-input {
+                width: 100%;
+            }
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+            .records-grid {
+                gap: 1rem;
+            }
+            .card-inner {
+                padding: 1.2rem;
+            }
+            .content-title {
+                font-size: 1.1rem;
+            }
+            .stats-container {
+                flex-direction: column;
+                gap: 0.8rem;
             }
         }
     </style>
@@ -345,6 +483,9 @@
         <h1>二手閑置交換站</h1>
         <div class="sub">分享你的潮玩、服裝、電子設備｜讓閑置重生</div>
     </div>
+
+    <!-- 統計摘要將動態渲染於此 -->
+    <div id="statsContainer" class="stats-container"></div>
 
     <!-- 新增表單 -->
     <div class="form-card">
@@ -372,7 +513,7 @@
         </div>
     </div>
 
-    <!-- 過濾器 -->
+    <!-- 過濾器 + 搜尋 -->
     <div class="filter-bar">
         <div class="filter-group">
             <span>🔍 篩選狀態：</span>
@@ -381,7 +522,8 @@
             <button data-status-filter="done" class="filter-btn">已完成 (done)</button>
         </div>
         <div class="filter-group">
-            <span>♻️ 點擊卡片按鈕可切換狀態</span>
+            <span>🔎 關鍵字搜尋：</span>
+            <input type="text" id="searchInput" class="search-input" placeholder="搜尋物品或留言...">
         </div>
     </div>
 
@@ -394,7 +536,6 @@
 
 <script>
     // ======================== BACKEND CONFIGURATION ========================
-    // Google Apps Script Web App URL
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygCO2C1pObxCe5lkwtfPBtkBVzZzn5dEd5N8IiHvY2I335UAzPW-jzcxaJpZFj80Nm/exec";
     
     // ======================== DATA CONTRACT ========================
@@ -411,22 +552,24 @@
      */
 
     // ---------- 全域變數 ----------
-    let recordsArray = [];            // 儲存所有交換紀錄
-    let currentStatusFilter = 'all';  // 'all', 'active', 'done'
+    let recordsArray = [];
+    let currentStatusFilter = 'all';
+    let currentSearchKeyword = '';
 
     // DOM 元素
     const listContainer = document.getElementById('listContainer');
+    const statsContainer = document.getElementById('statsContainer');
     const contentInput = document.getElementById('contentInput');
     const categorySelect = document.getElementById('categorySelect');
     const messageInput = document.getElementById('messageInput');
     const submitBtn = document.getElementById('submitBtn');
+    const searchInput = document.getElementById('searchInput');
 
     // ---------- 輔助函式 ----------
     function generateId() {
         return Date.now() + '-' + Math.random().toString(36).substring(2, 10);
     }
 
-    // 防止 XSS 攻擊
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
@@ -434,12 +577,9 @@
             if (m === '<') return '&lt;';
             if (m === '>') return '&gt;';
             return m;
-        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
-            return c;
         });
     }
 
-    // 格式化顯示時間 (從 ISO 轉為 月/日 時:分)
     function formatDateTime(isoString) {
         if (!isoString) return '日期錯誤';
         const d = new Date(isoString);
@@ -447,35 +587,59 @@
         return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
     }
 
+    // ======================== 視覺化函數 ========================
+    function renderStatsSummary(records) {
+        if (!statsContainer) return;
+        
+        const activeCount = records.filter(r => r.status === 'active').length;
+        const doneCount = records.filter(r => r.status === 'done').length;
+        const total = activeCount + doneCount;
+        
+        const activePercent = total === 0 ? 0 : (activeCount / total) * 100;
+        const donePercent = total === 0 ? 0 : (doneCount / total) * 100;
+        
+        const html = `
+            <div class="stat-card active-stat">
+                <div class="stat-number">${activeCount}</div>
+                <div class="stat-label">🟣 進行中 (active)</div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar active-bar" style="width: ${activePercent}%;"></div>
+                </div>
+            </div>
+            <div class="stat-card done-stat">
+                <div class="stat-number">${doneCount}</div>
+                <div class="stat-label">⚪ 已完成 (done)</div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar done-bar" style="width: ${donePercent}%;"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">${total}</div>
+                <div class="stat-label">📦 物品總數</div>
+            </div>
+        `;
+        
+        statsContainer.innerHTML = html;
+    }
+
     // ======================== BACKEND CONNECTOR FUNCTIONS ========================
     
-    /**
-     * 1. syncToSheet(payload)
-     * 使用 fetch POST 到 APPS_SCRIPT_URL，同步資料到 Google Sheet
-     * @param {Object} payload - { action, record?, id?, changes? }
-     * @returns {Promise<Object>} - 回傳 API 回應
-     */
     async function syncToSheet(payload) {
         try {
-            const response = await fetch(APPS_SCRIPT_URL, {
+            await fetch(APPS_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
                 headers: { "Content-Type": "text/plain" },
                 body: JSON.stringify(payload)
             });
             console.log("syncToSheet 已送出:", payload);
-            return { ok: true, message: "Request sent (no-cors mode)" };
+            return { ok: true };
         } catch (err) {
             console.error("syncToSheet 錯誤:", err);
             return { ok: false, error: err.message };
         }
     }
 
-    /**
-     * 2. fetchRecordsFromSheet()
-     * 使用 GET fetch(APPS_SCRIPT_URL) 讀取所有紀錄
-     * @returns {Promise<Array>} - 回傳紀錄陣列 (已正規化)
-     */
     async function fetchRecordsFromSheet() {
         try {
             const response = await fetch(APPS_SCRIPT_URL);
@@ -490,13 +654,6 @@
         }
     }
 
-    /**
-     * 3. normalizeRecord(record)
-     * 將 Sheet 回傳的欄位對應回前端 key
-     * 支援大小寫轉換 (ID -> id, CreatedAt -> createdAt, Status -> status)
-     * @param {Object} record - 從 Sheet 讀取的原始紀錄
-     * @returns {Object} - 正規化後的前端紀錄
-     */
     function normalizeRecord(record) {
         if (!record) return {};
         return {
@@ -509,7 +666,7 @@
         };
     }
 
-    // ---------- 核心函式 (修改版) ----------
+    // ---------- 核心函式 ----------
 
     function createRecord(formData) {
         if (!formData.content || formData.content.trim() === '') {
@@ -590,6 +747,8 @@
     }
 
     function renderList(recordsToShow) {
+        renderStatsSummary(recordsArray);
+        
         if (!listContainer) return;
         if (!recordsToShow || recordsToShow.length === 0) {
             listContainer.innerHTML = `<div class="empty-message">🍃 沒有符合狀態的交換物，試試不同篩選或新增閑置～</div>`;
@@ -620,7 +779,7 @@
                             <span class="${statusClass}">${statusText}</span>
                         </div>
                         <div class="content-title">📦 ${escapeHtml(record.content)}</div>
-                        ${record.message ? `<div class="message-text">💬 ${escapeHtml(record.message)}</div>` : `<div class="message-text" style="background:#faf3ea; color:#b6835b;">📝 沒有留下留言，直接詢問交換～</div>`}
+                        ${record.message ? `<div class="message-text">💬 ${escapeHtml(record.message)}</div>` : `<div class="message-text" style="background:#fefce8; color:#a855f7;">📝 沒有留下留言，直接詢問交換～</div>`}
                         <div class="meta-info">
                             <span>🕒 ${formatDateTime(record.createdAt)}</span>
                             <span>🆔 ${record.id.slice(-6)}</span>
@@ -656,9 +815,20 @@
 
     function getFilteredRecords() {
         let filtered = [...recordsArray];
+        
         if (currentStatusFilter !== 'all') {
             filtered = filtered.filter(record => record.status === currentStatusFilter);
         }
+        
+        if (currentSearchKeyword.trim() !== '') {
+            const keyword = currentSearchKeyword.trim().toLowerCase();
+            filtered = filtered.filter(record => {
+                const contentMatch = record.content.toLowerCase().includes(keyword);
+                const messageMatch = record.message.toLowerCase().includes(keyword);
+                return contentMatch || messageMatch;
+            });
+        }
+        
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         return filtered;
     }
@@ -693,6 +863,14 @@
         });
     }
 
+    function bindSearchEvent() {
+        if (!searchInput) return;
+        searchInput.addEventListener('input', (e) => {
+            currentSearchKeyword = e.target.value;
+            applyFilterAndRender();
+        });
+    }
+
     function addExchangeItem() {
         const content = contentInput.value;
         const category = categorySelect.value;
@@ -705,6 +883,8 @@
             contentInput.value = '';
             messageInput.value = '';
             currentStatusFilter = 'all';
+            currentSearchKeyword = '';
+            if (searchInput) searchInput.value = '';
             updateFilterButtonsUI();
             applyFilterAndRender();
             contentInput.focus();
@@ -716,6 +896,7 @@
     async function init() {
         await loadData();
         bindFilterEvents();
+        bindSearchEvent();
         submitBtn.addEventListener('click', () => {
             addExchangeItem();
         });
